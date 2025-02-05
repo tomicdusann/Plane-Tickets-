@@ -1,0 +1,153 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spisak Aviokompanija</title>
+    <link rel="stylesheet" href="css/custom-style2.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            loadAviokompanije();
+            ucitajKompanije();
+            // Kada korisnik podnese formu za recenziju
+            $('#recenzijaForm').submit(function (event) {
+                event.preventDefault();
+
+                var aviokompanija = $('#aviokompanijaSelect').val();
+                var naslov = $('#naslovRecenzije').val();
+                var sadrzaj = $('#sadrzajRecenzije').val();
+                var slika = $('#slikaInput')[0].files[0]; // Uzimamo prvi odabran fajl
+
+                // Kreiraj formData objekat za slanje podataka, uključujući fajl
+                var formData = new FormData();
+                formData.append("Aviokompanija", aviokompanija);
+                formData.append("Naslov", naslov);
+                formData.append("Sadrzaj", sadrzaj);
+                formData.append("Slika", slika);
+
+                kreirajRecenziju(formData);
+            });
+        });
+
+        function loadAviokompanije() {
+            $.ajax({
+                url: 'api/Aviokompanije', // Endpoint za preuzimanje svih aviokompanija
+                method: 'GET',
+                success: function (data) {
+                    var tableBody = $('#aviokompanijeTable tbody');
+                    tableBody.empty();
+                    data.forEach(function (aviokompanija) {
+                        var row = `
+                               <tr>
+                                   <td><a href="aviokompanijaRegular.html?naziv=${encodeURIComponent(aviokompanija.Naziv)}">${aviokompanija.Naziv}</a></td>
+                                   <td>${aviokompanija.KontaktInformacije}</td>
+                               </tr>`;
+                        tableBody.append(row);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error: ' + error);
+                }
+            });
+
+        }
+
+        function ucitajKompanije() {
+            $.ajax({
+                url: 'api/Recenzije/OneSaZavrsenim', // URL za dobijanje aviokompanija kojima pripadaju zavrseni letovi korisnika
+                method: 'GET',
+                success: function (data) {
+                    console.log('Učitane kompanije:', data);
+                    var aviokompanijaSelect = $('#aviokompanijaSelect');
+                    aviokompanijaSelect.empty();
+
+                    // Ako `data` sadrži atribut `Aviokompanije`
+                    if (data.Aviokompanije && Array.isArray(data.Aviokompanije)) {
+                        data.Aviokompanije.forEach(function (naziv) {
+                            aviokompanijaSelect.append('<option value="' + naziv + '">' + naziv + '</option>');
+                        });
+                    } else {
+                        console.error('Neispravni podaci:', data);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error: ' + error);
+                }
+            });
+        }
+
+
+
+        function kreirajRecenziju(formData) {
+            $.ajax({
+                url: 'api/Recenzije/kreiraj',
+                method: 'POST',
+                contentType: false, // Mora biti false kod slanja fajlova
+                processData: false, // Mora biti false kod slanja fajlova
+                data: formData,
+                success: function (response) {
+                    alert('Recenzija uspešno kreirana!');
+                    $('#recenzijaForm')[0].reset(); // Resetuje formu
+                },
+                error: function (xhr, status, error) {
+                    if (xhr.status === 400) {
+                        alert('Kreiranje recenzije nije uspelo.');
+                    }
+                    console.error('Error: ' + error);
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="header">
+        <a href="kompanijeRegular.html">Aviokompanije</a>
+        <a href="profilRegular.html">Uredi profil</a>
+        <a href="rezervacijeRegular.html">Moje rezervacije</a>
+        <a href="indexRegular.html">Pocetna</a>
+        <button onclick="window.location.href='prijava.html'">Prijava</button>
+        <button onclick="window.location.href='registracija.html'">Registracija</button>
+        <button onclick="window.location.href='index.html'">Odjavi se</button>
+    </div>
+
+    <div class="container">
+        <h2>Spisak Aviokompanija</h2>
+        <table id="aviokompanijeTable">
+            <thead>
+                <tr>
+                    <th>Naziv Aviokompanije</th>
+                    <th>Kontakt Informacije</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dinamički sadržaj aviokompanija -->
+            </tbody>
+        </table>
+
+        <h2>Dodaj Recenziju</h2>
+        <form id="recenzijaForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="aviokompanijaSelect">Izaberi aviokompaniju:</label>
+                <select id="aviokompanijaSelect" name="aviokompanijaSelect" required>
+                    <option value="">Izaberite aviokompaniju</option>
+                    <!-- Opcije će biti učitane dinamički -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="naslovRecenzije">Naslov recenzije:</label>
+                <input type="text" id="naslovRecenzije" name="naslovRecenzije" required>
+            </div>
+            <div class="form-group">
+                <label for="sadrzajRecenzije">Sadržaj recenzije:</label>
+                <textarea id="sadrzajRecenzije" name="sadrzajRecenzije" rows="5" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="slikaInput">Dodaj sliku:</label>
+                <input type="file" id="slikaInput" name="slikaInput" accept="image/*">
+            </div>
+            <button type="submit" class="btn btn-primary">Pošalji recenziju</button>
+        </form>
+    </div>
+</body>
+</html>

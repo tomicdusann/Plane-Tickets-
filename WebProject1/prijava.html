@@ -1,0 +1,97 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prijava</title>
+    <link rel="stylesheet" href="css/registration-style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        /*$(document).ready(function () {
+            $('#prijavaForm').on('submit', function (e) {
+                e.preventDefault();
+
+                var korisnickoIme = $('#korisnickoIme').val();
+                var lozinka = $('#lozinka').val();
+
+                $.ajax({
+                    url: 'api/Korisnici/prijava',
+                    method: 'POST',
+                    data: JSON.stringify({ KorisnickoIme: korisnickoIme, Lozinka: lozinka }),
+                    contentType: 'application/json',
+                    success: function () {
+                        console.log("Korisnik je prijavljen:");
+
+                        setTimeout(function () {
+                            window.location.href = 'indexRegular.html';
+                        }, 10000);
+                    },
+                    error: function (xhr, status, error) {
+                        $('#errorPoruka').text('Neuspešna prijava. Proverite korisničko ime i lozinku.');
+                        $('#errorPoruka').show();
+                    }
+                });
+            });
+        });*/
+
+            $(document).ready(function () {
+                $('#prijavaForm').submit(function (event) {
+                    event.preventDefault();
+
+                    var korisnickoIme = $('#korisnickoIme').val();
+                    var lozinka = $('#lozinka').val();
+                    var tipKorisnika = $('input[name="userType"]:checked').val();
+
+                    $.ajax({
+                        url: 'api/Korisnici/prijava',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            KorisnickoIme: korisnickoIme,
+                            Lozinka: lozinka,
+                            TipKorisnika: tipKorisnika
+                        }),
+                        success: function (response) {
+                            if (response.success) {
+                                console.log("Korisnik je prijavljen:");
+                                alert("Korisnik je prijavljen");
+                                setTimeout(function () {
+                                    window.location.href = response.redirectUrl;
+                                }, 5000);
+                            } else {
+                                alert(response.message);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error: ' + error);
+                        }
+                    });
+                });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Prijava</h2>
+        <form id="prijavaForm">
+            <div class="form-group">
+                <label for="korisnickoIme">Korisničko ime:</label>
+                <input type="text" id="korisnickoIme" name="korisnickoIme" autocomplete="off" required>
+            </div>
+            <div class="form-group">
+                <label for="lozinka">Lozinka:</label>
+                <input type="password" id="lozinka" name="lozinka" autocomplete="off" required>
+            </div>
+            <div class="form-group">
+                <label for="userType">Tip korisnika:</label>
+                <input type="radio" id="Putnik" name="userType" value="Putnik" checked>
+                <label for="user">Korisnik</label>
+                <input type="radio" id="Administrator" name="userType" value="Administrator">
+                <label for="admin">Administrator</label>
+            </div>
+            <div id="errorPoruka" style="color: red; display: none;"></div>
+            <button type="submit">Prijavi se</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,185 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administracija aviokompanija</title>
+    <link rel="stylesheet" href="css/custom-style1.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            loadAviokompanije();
+        });
+
+        function loadAviokompanije() {
+            $.ajax({
+                url: 'api/Aviokompanije', // Endpoint za preuzimanje svih aviokompanija
+                method: 'GET',
+                success: function (data) {
+                    var tableBody = $('#aviokompanijeTable tbody');
+                    tableBody.empty();
+                    data.forEach(function (aviokompanija) {
+                        var row = `
+                       <tr>
+                           <td><a href="aviokompanijaAdmin.html?naziv=${encodeURIComponent(aviokompanija.Naziv)}">${aviokompanija.Naziv}</a></td>
+                           <td>${aviokompanija.KontaktInformacije}</td>
+                       </tr>`;
+                        tableBody.append(row);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error: ' + error);
+                }
+            });
+
+        }
+
+        $(document).ready(function () {
+            $('#searchCompanyForm').submit(function (event) {
+                event.preventDefault();
+
+                var naziv = $('#naziv').val();
+                var adresa = $('#adresa').val();
+                var kontaktInformacije = $('#kontaktInformacije').val();
+
+                $.ajax({
+                    url: 'api/Aviokompanije/search',
+                    method: 'GET',
+                    data: {
+                        naziv: naziv,
+                        adresa: adresa,
+                        kontaktInformacije: kontaktInformacije
+                    },
+                    success: function (data) {
+                        var resultsTable = $('#searchCompanyResultsTable tbody');
+                        resultsTable.empty();
+
+                        data.forEach(function (aviokompanija) {
+                            var row = `<tr>
+                        <td>${aviokompanija.Naziv}</td>
+                        <td>${aviokompanija.Adresa}</td>
+                        <td>${aviokompanija.KontaktInformacije}</td>
+                    </tr>`;
+                            resultsTable.append(row);
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error: ' + error);
+                    }
+                });
+            });
+
+            $('#createCompanyForm').submit(function (event) {
+                event.preventDefault();
+
+                var newCompany = {
+                    Naziv: $('#newNaziv').val(),
+                    Adresa: $('#newAdresa').val(),
+                    KontaktInformacije: $('#newKontaktInformacije').val()
+                };
+
+                $.ajax({
+                    url: 'api/Aviokompanije/create', // Endpoint za kreiranje nove aviokompanije
+                    method: 'POST',
+                    data: JSON.stringify(newCompany),
+                    contentType: 'application/json',
+                    success: function (response) {
+                        alert('Aviokompanija je uspešno kreirana.');
+                        loadAviokompanije();
+                        $('#createCompanyForm')[0].reset(); // Resetuje formu nakon kreiranja
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error: ' + error);
+                    }
+                });
+            });
+
+            $('#resetButton').click(function () {
+                $('#naziv').val('');
+                $('#adresa').val('');
+                $('#kontaktInformacije').val('');
+                $('#searchCompanyResultsTable tbody').empty();
+            });
+        });
+
+    </script>
+</head>
+<body>
+    <div class="header">
+        <a href="kompanijeAdmin.html">Upravljaj aviokompanijama</a>
+        <a href="letoviAdmin.html">Upravljaj letovima</a>
+        <a href="rezervacijeAdmin.html">Upravljaj rezervacijama</a>
+        <a href="recenzijeAdmin.html">Odobri recenzije</a>
+        <a href="profilAdmin.html">Uredi profil</a>
+        <a href="indexAdmin.html">Pocetna</a>
+        <button onclick="window.location.href='prijava.html'">Prijava</button>
+        <button onclick="window.location.href='registracija.html'">Registracija</button>
+        <button onclick="window.location.href='index.html'">Odjavi se</button>
+    </div>
+
+    <div class="container">
+        <h2>Spisak Aviokompanija</h2>
+        <table id="aviokompanijeTable">
+            <thead>
+                <tr>
+                    <th>Naziv Aviokompanije</th>
+                    <th>Kontakt Informacije</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dinamički sadržaj aviokompanija -->
+            </tbody>
+        </table>
+
+        <h2>Pretraga Aviokompanija</h2>
+        <form id="searchCompanyForm">
+            <div class="form-group">
+                <label for="naziv">Naziv:</label>
+                <input type="text" class="form-control" id="naziv" name="naziv">
+            </div>
+            <div class="form-group">
+                <label for="adresa">Adresa:</label>
+                <input type="text" class="form-control" id="adresa" name="adresa">
+            </div>
+            <div class="form-group">
+                <label for="kontaktInformacije">Kontakt informacije:</label>
+                <input type="text" class="form-control" id="kontaktInformacije" name="kontaktInformacije">
+            </div>
+            <button type="submit" class="btn btn-primary">Pretraga</button>
+            <button type="button" class="btn btn-primary" id="resetButton">Poništi</button>
+        </form>
+
+        <h2>Rezultati pretrage Aviokompanija</h2>
+        <table class="table" id="searchCompanyResultsTable">
+            <thead>
+                <tr>
+                    <th>Naziv</th>
+                    <th>Adresa</th>
+                    <th>Kontakt informacije</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dinamički sadržaj -->
+            </tbody>
+        </table>
+
+
+        <h2>Kreiranje nove Aviokompanije</h2>
+        <form id="createCompanyForm">
+            <div class="form-group">
+                <label for="newNaziv">Naziv:</label>
+                <input type="text" class="form-control" id="newNaziv" name="newNaziv" required>
+            </div>
+            <div class="form-group">
+                <label for="newAdresa">Adresa:</label>
+                <input type="text" class="form-control" id="newAdresa" name="newAdresa" required>
+            </div>
+            <div class="form-group">
+                <label for="newKontaktInformacije">Kontakt Informacije:</label>
+                <input type="text" class="form-control" id="newKontaktInformacije" name="newKontaktInformacije" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Kreiraj Aviokompaniju</button>
+        </form>
+    </div>
+</body>
+</html>

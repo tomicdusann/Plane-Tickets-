@@ -1,0 +1,169 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Rezervacija Avio Karata</title>
+    <link rel="stylesheet" href="css/custom-style1.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            // Filtriraj letova po korisniku
+            $('#filterOrder').change(function () {
+                var filterOrder = $(this).val();
+                filtrirajKorisnike(filterOrder);
+            });
+
+            $('#searchUserForm').on('submit', function (e) {
+                e.preventDefault();
+                var formData = $(this).serialize();
+                searchUsers(formData);
+            });
+
+            $('#resetButton').on('click', function () {
+                $('#searchUserForm')[0].reset();
+                $('#searchUserResultsTable tbody').empty();
+            });
+        });
+
+        function filtrirajKorisnike(filterOrder) {
+            $.ajax({
+                url: 'http://localhost:62378/api/Korisnici/filtrirajAdmin',
+                method: 'GET',
+                data: { filterOrder: filterOrder },
+                success: function (data) {
+                    console.log(data);
+
+                    var tableBody = $('#filterResultsTable tbody');
+                    tableBody.empty();
+                    data.forEach(function (korisnik) {
+                        var row = '<tr>' +
+                            '<td>' + korisnik.KorisnickoIme + '</td>' +
+                            '<td>' + korisnik.Ime + '</td>' +
+                            '<td>' + korisnik.Prezime + '</td>' +
+                            '<td>' + new Date(korisnik.DatumRodjenja).toLocaleString() + '</td>' +
+                            '<td>' + korisnik.Email + '</td>' +
+                            '<td>' + korisnik.TipKorisnika + '</td>' +
+                            '</tr>';
+                        tableBody.append(row);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error: ' + error);
+                }
+            });
+        }
+
+        function searchUsers(formData) {
+            $.ajax({
+                url: 'api/Korisnici/Search',
+                method: 'GET',
+                data: formData,
+                success: function (data) {
+                    var tableBody = $('#searchUserResultsTable tbody');
+                    tableBody.empty();
+                    data.forEach(function (korisnik) {
+                        var row = '<tr>' +
+                            '<td>' + korisnik.Ime + '</td>' +
+                            '<td>' + korisnik.Prezime + '</td>' +
+                            '<td>' + new Date(korisnik.DatumRodjenja).toLocaleDateString() + '</td>' +
+                            '<td>' + korisnik.KorisnickoIme + '</td>' +
+                            '<td>' + korisnik.Email + '</td>' +
+                            '</tr>';
+                        tableBody.append(row);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error: ' + error);
+                }
+            });
+        }
+
+    </script>
+</head>
+<body>
+    <div class="header">
+        <a href="kompanijeAdmin.html">Upravljaj aviokompanijama</a>
+        <a href="letoviAdmin.html">Upravljaj letovima</a>
+        <a href="rezervacijeAdmin.html">Upravljaj rezervacijama</a>
+        <a href="recenzijeAdmin.html">Odobri recenzije</a>
+        <a href="profilAdmin.html">Uredi profil</a>
+        <a href="indexAdmin.html">Pocetna</a>
+        <button onclick="window.location.href='prijava.html'">Prijava</button>
+        <button onclick="window.location.href='registracija.html'">Registracija</button>
+        <button onclick="window.location.href='index.html'">Odjavi se</button>
+    </div>
+
+    <div class="container">
+        <h2>Korisnici sistema</h2>
+        <select id="filterOrder" class="form-control">
+            <option value="administratorNameSurnameRastuce">Administratori - sortitaj po imenu i prezimenu rastuce</option>
+            <option value="administratorNameSurnameOpadajuce">Administratori - sortitaj po imenu i prezimenu opadajuce</option>
+            <option value="administratorDatumRastuce">Administratori - sortiraj datumu rodjenja rastuce</option>
+            <option value="administratorDatumOpadajuce">Administratori - sortiraj datumu rodjenja opadajuce</option>
+
+            <option value="putnikNameSurnameRastuce">Putnici - sortiraj po imenu i prezimenu rastuce</option>
+            <option value="putnikNameSurnameOpadajuce">Putnici - sortiraj po imenu i prezimenu opadajuce</option>
+            <option value="putnikDatumRastuce">Putnici - sortiraj po datumu rodjenja rastuce</option>
+            <option value="putnikDatumOpadajuce">Putnici - sortiraj po datumu rodjenja opadajuce</option>
+        </select>
+
+        <table class="table" id="filterResultsTable">
+            <thead>
+                <tr>
+                    <th>Korisnicko ime</th>
+                    <th>Ime</th>
+                    <th>Prezime</th>
+                    <th>Datum rodjenja</th>
+                    <th>Email</th>
+                    <th>Tip korisnika</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dinamički sadržaj -->
+            </tbody>
+        </table>
+
+
+        <h2>Pretraga korisnika</h2>
+        <form id="searchUserForm">
+            <div class="form-group">
+                <label for="ime">Ime:</label>
+                <input type="text" class="form-control" id="ime" name="ime">
+            </div>
+            <div class="form-group">
+                <label for="prezime">Prezime:</label>
+                <input type="text" class="form-control" id="prezime" name="prezime">
+            </div>
+            <div class="form-group">
+                <label for="datumRodjenjaOd">Datum rođenja od:</label>
+                <input type="date" class="form-control" id="datumRodjenjaOd" name="datumRodjenjaOd">
+            </div>
+            <div class="form-group">
+                <label for="datumRodjenjaDo">Datum rođenja do:</label>
+                <input type="date" class="form-control" id="datumRodjenjaDo" name="datumRodjenjaDo">
+            </div>
+            <button type="submit" class="btn btn-primary">Pretraga</button>
+            <button type="button" class="btn btn-primary" id="resetButton">Poništi</button>
+        </form>
+
+        <h2>Rezultati pretrage korisnika</h2>
+        <table class="table" id="searchUserResultsTable">
+            <thead>
+                <tr>
+                    <th>Ime</th>
+                    <th>Prezime</th>
+                    <th>Datum rođenja</th>
+                    <th>Korisničko ime</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dinamički sadržaj -->
+            </tbody>
+        </table>
+
+    </div>
+</body>
+</html>

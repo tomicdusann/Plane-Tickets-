@@ -1,0 +1,216 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administracija Rezervacija</title>
+    <link rel="stylesheet" href="css/custom-style2.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            ucitajRezervacijeKreirane();
+            ucitajRezervacijeCekaNaOtkazivanje();
+            ucitajRezervacijeOdobrene();
+            ucitajRezervacijeZavrsene();
+            ucitajRezervacijeOtkazane();
+        });
+
+        function ucitajRezervacijeKreirane() {
+            $.ajax({
+                url: 'api/Rezervacije/KreiraneAdmin',
+                method: 'GET',
+                data: { statusFilter: 'Kreirana' },
+                success: function (data) {
+                    var rezervacijeKreiraneList = $('#rezervacijeKreiraneList');
+                    data.forEach(function (rezervacija) {
+                        var rezervacijaHtml = `
+                                <div class="recenzija">
+                                    <h4>Let: ${rezervacija.Let.LetID} - ${rezervacija.Let.PolaznaDestinacija} do ${rezervacija.Let.OdredisnaDestinacija}</h4>
+                                    <p>Korisnik: ${rezervacija.Korisnik}</p>
+                                    <p>Broj putnika: ${rezervacija.BrojPutnika}</p>
+                                    <p>Ukupna cena: ${rezervacija.UkupnaCena} RSD</p>
+                                    <p>Status: <span class="status">${rezervacija.Status}</span></p>
+                                    <p>Datum polaska: ${new Date(rezervacija.Let.DatumVremePolaska).toLocaleString()}</p>
+                                    <button type="submit" class="btn-primary" data-id="${rezervacija.RezervacijaID}" data-funkcija="Odobri">Odobri</button>
+                                </div>`;
+                        rezervacijeKreiraneList.append(rezervacijaHtml);
+                    });
+
+                    // Dodaj funkcionalnost dugmetu
+                    $('button').click(function () {
+                        var rezervacijaID = $(this).data('id');
+                        var funkcija = $(this).data('funkcija');
+                        if (rezervacijaID && funkcija) {
+                            updateRezervacijaStatus(rezervacijaID, funkcija);
+                        }
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Greška prilikom učitavanja rezervacija: ' + error);
+                }
+            });
+        }
+
+        function ucitajRezervacijeCekaNaOtkazivanje() {
+            $.ajax({
+                url: 'api/Rezervacije/CekajuAdmin',
+                method: 'GET',
+                data: { statusFilter: 'CekaNaOtkazivanje' },
+                success: function (data) {
+                    var rezervacijeCekajuList = $('#rezervacijeCekajuList');
+                    data.forEach(function (rezervacija) {
+                        var rezervacijaHtml = `
+                                <div class="recenzija">
+                                    <h4>Let: ${rezervacija.Let.LetID} - ${rezervacija.Let.PolaznaDestinacija} do ${rezervacija.Let.OdredisnaDestinacija}</h4>
+                                    <p>Korisnik: ${rezervacija.Korisnik}</p>
+                                    <p>Broj putnika: ${rezervacija.BrojPutnika}</p>
+                                    <p>Ukupna cena: ${rezervacija.UkupnaCena} RSD</p>
+                                    <p>Status: <span class="status">${rezervacija.Status}</span></p>
+                                    <p>Datum polaska: ${new Date(rezervacija.Let.DatumVremePolaska).toLocaleString()}</p>
+                                    <button type="submit" class="btn-primary" data-id="${rezervacija.RezervacijaID}" data-funkcija="Otkazi">Otkaži</button>
+                                </div>`;
+                        rezervacijeCekajuList.append(rezervacijaHtml);
+                    });
+
+                    // Dodaj funkcionalnost dugmetu
+                    $('button').click(function () {
+                        var rezervacijaID = $(this).data('id');
+                        var funkcija = $(this).data('funkcija');
+                        if (rezervacijaID && funkcija) {
+                            updateRezervacijaStatus(rezervacijaID, funkcija);
+                        }
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Greška prilikom učitavanja rezervacija: ' + error);
+                }
+            });
+        }
+
+        function ucitajRezervacijeOdobrene() {
+            $.ajax({
+                url: 'api/Rezervacije/OdobreneAdmin',
+                method: 'GET',
+                data: { statusFilter: 'Odobrena' },
+                success: function (data) {
+                    var rezervacijeOdobreneList = $('#rezervacijeOdobreneList');
+                    data.forEach(function (rezervacija) {
+                        var rezervacijaHtml = `
+                        <div class="recenzija">
+                            <h4>Let: ${rezervacija.Let.LetID} - ${rezervacija.Let.PolaznaDestinacija} do ${rezervacija.Let.OdredisnaDestinacija}</h4>
+                            <p>Korisnik: ${rezervacija.Korisnik}</p>
+                            <p>Broj putnika: ${rezervacija.BrojPutnika}</p>
+                            <p>Ukupna cena: ${rezervacija.UkupnaCena} RSD</p>
+                            <p>Status: <span class="status">${rezervacija.Status}</span></p>
+                            <p>Datum polaska: ${new Date(rezervacija.Let.DatumVremePolaska).toLocaleString()}</p>
+                        </div>`;
+                        rezervacijeOdobreneList.append(rezervacijaHtml);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Greška prilikom učitavanja rezervacija: ' + error);
+                }
+            });
+        }
+
+        function ucitajRezervacijeZavrsene() {
+            $.ajax({
+                url: 'api/Rezervacije/ZavrseneAdmin',
+                method: 'GET',
+                data: { statusFilter: 'Zavrsena' },
+                success: function (data) {
+                    var rezervacijeZavrseneList = $('#rezervacijeZavrseneList');
+                    data.forEach(function (rezervacija) {
+                        var rezervacijaHtml = `
+                                <div class="recenzija">
+                                    <h4>Let: ${rezervacija.Let.LetID} - ${rezervacija.Let.PolaznaDestinacija} do ${rezervacija.Let.OdredisnaDestinacija}</h4>
+                                    <p>Korisnik: ${rezervacija.Korisnik}</p>
+                                    <p>Broj putnika: ${rezervacija.BrojPutnika}</p>
+                                    <p>Ukupna cena: ${rezervacija.UkupnaCena} RSD</p>
+                                    <p>Status: <span class="status">${rezervacija.Status}</span></p>
+                                    <p>Datum polaska: ${new Date(rezervacija.Let.DatumVremePolaska).toLocaleString()}</p>
+                                </div>`;
+                        rezervacijeZavrseneList.append(rezervacijaHtml);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Greška prilikom učitavanja rezervacija: ' + error);
+                }
+            });
+        }
+
+        function ucitajRezervacijeOtkazane() {
+            $.ajax({
+                url: 'api/Rezervacije/OtkazaneAdmin',
+                method: 'GET',
+                data: { statusFilter: 'Otkazana' },
+                success: function (data) {
+                    var rezervacijeOtkazaneList = $('#rezervacijeOtkazaneList');
+                    data.forEach(function (rezervacija) {
+                        var rezervacijaHtml = `
+                                <div class="recenzija">
+                                    <h4>Let: ${rezervacija.Let.LetID} - ${rezervacija.Let.PolaznaDestinacija} do ${rezervacija.Let.OdredisnaDestinacija}</h4>
+                                    <p>Korisnik: ${rezervacija.Korisnik}</p>
+                                    <p>Broj putnika: ${rezervacija.BrojPutnika}</p>
+                                    <p>Ukupna cena: ${rezervacija.UkupnaCena} RSD</p>
+                                    <p>Status: <span class="status">${rezervacija.Status}</span></p>
+                                    <p>Datum polaska: ${new Date(rezervacija.Let.DatumVremePolaska).toLocaleString()}</p>
+                                </div>`;
+                        rezervacijeOtkazaneList.append(rezervacijaHtml);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Greška prilikom učitavanja rezervacija: ' + error);
+                }
+            });
+        }
+
+        function updateRezervacijaStatus(rezervacijaID, status) {
+            $.ajax({
+                url: 'api/Rezervacije/' + encodeURIComponent(rezervacijaID) + '/status',
+                method: 'PUT',
+                data: JSON.stringify({ StatusRezervacijePromena: status }),
+                contentType: 'application/json',
+                success: function () {
+                    alert('Status rezervacije je uspešno promenjen.');
+                    location.reload(); // Osvežavanje stranice nakon promene statusa
+                },
+                error: function (xhr, status, error) {
+                    console.error('Greška prilikom promene statusa: ' + error);
+                    alert('Došlo je do greške prilikom promene statusa rezervacije.');
+                }
+            });
+        }
+
+    </script>
+</head>
+<body>
+    <div class="header">
+        <a href="kompanijeAdmin.html">Upravljaj aviokompanijama</a>
+        <a href="letoviAdmin.html">Upravljaj letovima</a>
+        <a href="rezervacijeAdmin.html">Upravljaj rezervacijama</a>
+        <a href="recenzijeAdmin.html">Odobri recenzije</a>
+        <a href="profilAdmin.html">Uredi profil</a>
+        <a href="indexAdmin.html">Pocetna</a>
+        <button onclick="window.location.href='prijava.html'">Prijava</button>
+        <button onclick="window.location.href='registracija.html'">Registracija</button>
+        <button onclick="window.location.href='index.html'">Odjavi se</button>
+    </div>
+    <div class="container">
+        <h2>Kreirane rezervacije</h2>
+        <div id="rezervacijeKreiraneList"></div>
+        <br/>
+        <h2>Podnet zahtev za otkazivanje</h2>
+        <div id="rezervacijeCekajuList"></div>
+        <br />
+        <h2>Odobrene rezervacije</h2>
+        <div id="rezervacijeOdobreneList"></div>
+        <br/>
+        <h2>Zavrsene rezervacije</h2>
+        <div id="rezervacijeZavrseneList"></div>
+        <br/>
+        <h2>Otkazane rezervacije</h2>
+        <div id="rezervacijeOtkazaneList"></div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,117 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration</title>
+    <link rel="stylesheet" href="css/registration-style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#registrationForm').on('submit', function (e) {
+                e.preventDefault();
+
+                var korisnickoIme = $('#korisnickoIme').val();
+
+                $.ajax({
+                    url: 'api/Korisnici/proveriKorisnickoIme/' + encodeURIComponent(korisnickoIme),
+                    method: 'GET',
+                    success: function (response) {
+                        if (response === true) {
+                            alert("Korisničko ime već postoji. Molimo vas izaberite drugo.");
+                        } else {
+                            // Ako korisničko ime ne postoji, pošalji formu
+                            $.ajax({
+                                url: 'api/Korisnici/registracija',
+                                method: 'POST',
+                                data: $('#registrationForm').serialize(),
+                                success: function () {
+                                    console.log("Registracija uspešna.");
+
+                                    $.ajax({
+                                        url: 'api/korisnici/proveri-sesiju',
+                                        method: 'GET',
+                                        success: function (data) {
+                                            console.log("Korisnik je registrovan:", data);
+
+                                            setTimeout(function () {
+                                                window.location.href = 'indexRegular.html';
+                                            }, 2000);
+                                        },
+                                        error: function (xhr, status, error) {
+                                            console.error("Sesija nije pronađena.");
+                                        }
+                                    });
+
+                                    
+                                },
+                                error: function (xhr, status, error) {
+                                    alert("Došlo je do greške prilikom registracije.");
+                                }
+                            });
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Došlo je do greške prilikom provere korisničkog imena.");
+                    }
+                });
+            });
+        });
+    </script>
+
+</head>
+<body>
+
+    <div class="registration-container">
+        <h2>Registracija</h2>
+        <form id="registrationForm">
+            <label for="korisnickoIme">Korisničko ime:</label>
+            <input type="text" id="korisnickoIme" name="korisnickoIme" required>
+            <span id="korisnickoImeError" class="error-message"></span>
+
+            <label for="lozinka">Lozinka:</label>
+            <input type="password" id="lozinka" name="lozinka" required>
+
+            <label for="ime">Ime:</label>
+            <input type="text" id="ime" name="ime" required>
+
+            <label for="prezime">Prezime:</label>
+            <input type="text" id="prezime" name="prezime" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required />
+            <span id="emailError" class="error-message"></span>
+
+            <label for="datumRodjenja">Datum rođenja (dd/mm/yyyy):</label>
+            <input type="text" id="datumRodjenja" name="datumRodjenja" placeholder="dd/mm/yyyy" required>
+
+
+            <label for="pol">Pol:</label>
+            <select id="pol" name="pol" required>
+                <option value="Muski">Muški</option>
+                <option value="Zenski">Ženski</option>
+            </select>
+
+            <button type="submit">Registruj se</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('datumRodjenja').addEventListener('input', function (e) {
+            var input = e.target.value.replace(/\D/g, '').substring(0, 8);
+            var day = input.substring(0, 2);
+            var month = input.substring(2, 4);
+            var year = input.substring(4, 8);
+
+            if (input.length > 4) {
+                e.target.value = day + '/' + month + '/' + year;
+            } else if (input.length > 2) {
+                e.target.value = day + '/' + month;
+            } else {
+                e.target.value = day;
+            }
+        });
+
+    </script>
+</body>
+</html>

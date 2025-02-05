@@ -1,0 +1,156 @@
+﻿/* Osnovni stilovi za telo stranice */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #121212; /* Tamna pozadina */
+    color: #e0e0e0; /* Svetla boja teksta */
+}
+
+/* Stilovi za kontejner */
+.container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Naslovi */
+h2 {
+    color: #4fc3f7; /* Svetloplava boja naslova */
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+/* Tabela */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background-color: #1e1e1e; /* Tamna pozadina za tabelu */
+}
+
+table, th, td {
+    border: 1px solid #333;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #333; /* Tamnija pozadina za zaglavlja tabele */
+    color: #e0e0e0; /* Svetla boja teksta u zaglavljima */
+}
+
+td {
+    color: #e0e0e0; /* Svetla boja teksta u ćelijama */
+}
+
+/* Stil za redove tabele */
+tr:nth-child(even) {
+    background-color: #292929; /* Tamnija pozadina za parne redove */
+}
+
+/* Formular */
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: #e0e0e0; /* Svetla boja teksta za labelu */
+}
+
+input[type="text"], input[type="date"], select {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #333;
+    border-radius: 4px;
+    background-color: #1e1e1e; /* Tamna pozadina za inpute */
+    color: #e0e0e0; /* Svetla boja teksta u inputima */
+}
+
+/* Dugmad */
+button {
+    padding: 10px 20px;
+    margin-right: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+    button.btn-primary {
+        background-color: #4fc3f7; /* Svetloplava boja za dugme */
+        color: #121212; /* Tamna boja teksta na dugmetu */
+        font-size: 16px;
+    }
+
+        button.btn-primary:hover {
+            background-color: #39a0e2; /* Tamnija svetloplava boja pri hover-u */
+        }
+
+/* Linkovi */
+a {
+    color: #4fc3f7; /* Svetloplava boja linkova */
+    text-decoration: none;
+}
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+/* Stil za reset dugme */
+#resetButton {
+    background-color: #555; /* Siva boja za reset dugme */
+    color: #e0e0e0; /* Svetla boja teksta */
+    font-size: 16px;
+}
+
+    #resetButton:hover {
+        background-color: #777; /* Tamnija siva boja pri hover-u */
+    }
+
+/* Stil za select (sortiranje) */
+#sortOrder {
+    margin-top: 15px;
+    background-color: #1e1e1e; /* Tamna pozadina za select */
+    color: #e0e0e0; /* Svetla boja teksta u select */
+    border: 1px solid #333;
+}
+
+.header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+}
+
+.header a, .header button {
+    margin-left: 15px;
+    color: white;
+    text-decoration: none;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+.header a:hover {
+    text-decoration: underline;
+}
+
+    .header button {
+        padding: 5px 10px;
+        border-radius: 5px;
+        background-color: #4fc3f7;
+        color: black;
+        transition: background-color 0.3s;
+    }
+
+        .header button:hover {
+            background-color: #39a0e2;
+        }

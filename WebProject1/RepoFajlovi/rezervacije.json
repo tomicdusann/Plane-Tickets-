@@ -1,0 +1,86 @@
+[
+  {
+    "RezervacijaID": 604351169,
+    "Korisnik": "testkorisnik",
+    "Let": {
+      "LetID": 1915809565,
+      "Aviokompanija": "Test123",
+      "PolaznaDestinacija": "Beograd",
+      "OdredisnaDestinacija": "London",
+      "DatumVremePolaska": "2024-09-19T09:36:00",
+      "DatumVremeDolaska": "2024-09-26T09:36:00",
+      "BrojSlobodnihMesta": 97,
+      "BrojZauzetihMesta": 3,
+      "Cena": 50.0,
+      "Status": "Aktivan",
+      "StatusLeta": 0
+    },
+    "BrojPutnika": 3,
+    "UkupnaCena": 150.0,
+    "Status": "Odobrena",
+    "StatusRezervacije": 1
+  },
+  {
+    "RezervacijaID": 1408335790,
+    "Korisnik": "testkorisnik",
+    "Let": {
+      "LetID": 1204985563,
+      "Aviokompanija": "Test123",
+      "PolaznaDestinacija": "Beograd",
+      "OdredisnaDestinacija": "Pariz",
+      "DatumVremePolaska": "2024-09-15T09:37:00",
+      "DatumVremeDolaska": "2024-09-22T09:37:00",
+      "BrojSlobodnihMesta": 199,
+      "BrojZauzetihMesta": 1,
+      "Cena": 30.0,
+      "Status": "Aktivan",
+      "StatusLeta": 0
+    },
+    "BrojPutnika": 1,
+    "UkupnaCena": 30.0,
+    "Status": "Kreirana",
+    "StatusRezervacije": 0
+  },
+  {
+    "RezervacijaID": 980672745,
+    "Korisnik": "testkorisnik",
+    "Let": {
+      "LetID": 1153475981,
+      "Aviokompanija": "Test123",
+      "PolaznaDestinacija": "Beograd",
+      "OdredisnaDestinacija": "Tokijo",
+      "DatumVremePolaska": "2024-09-24T09:43:00",
+      "DatumVremeDolaska": "2024-09-24T00:43:00",
+      "BrojSlobodnihMesta": 295,
+      "BrojZauzetihMesta": 5,
+      "Cena": 50.0,
+      "Status": "Aktivan",
+      "StatusLeta": 0
+    },
+    "BrojPutnika": 5,
+    "UkupnaCena": 250.0,
+    "Status": "Odobrena",
+    "StatusRezervacije": 1
+  },
+  {
+    "RezervacijaID": 1980539448,
+    "Korisnik": "testkorisnik",
+    "Let": {
+      "LetID": 132269475,
+      "Aviokompanija": "Test123",
+      "PolaznaDestinacija": "Beograd",
+      "OdredisnaDestinacija": "Moskva",
+      "DatumVremePolaska": "2024-09-19T09:50:00",
+      "DatumVremeDolaska": "2024-09-19T09:52:00",
+      "BrojSlobodnihMesta": 45,
+      "BrojZauzetihMesta": 5,
+      "Cena": 50.0,
+      "Status": "Zavrsen",
+      "StatusLeta": 2
+    },
+    "BrojPutnika": 5,
+    "UkupnaCena": 250.0,
+    "Status": "Zavrsena",
+    "StatusRezervacije": 3
+  }
+]

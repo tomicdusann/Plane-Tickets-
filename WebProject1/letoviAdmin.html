@@ -1,0 +1,261 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upravljanje Letovima</title>
+    <link rel="stylesheet" href="css/custom-style1.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            loadAviokompanije();
+
+            // Filtriraj letove po statusu
+            $('#filterOrder').change(function () {
+                var filterOrder = $(this).val();
+                filtrirajLetove(filterOrder);
+            });
+
+            $('#searchFlightForm').on('submit', function (e) {
+                e.preventDefault();
+                var formData = $(this).serialize();
+                searchFlights(formData);
+            });
+
+            $('#resetButton').on('click', function () {
+                $('#searchFlightForm')[0].reset();
+                $('#searchFlightResultsTable tbody').empty();
+            });
+
+            $('#addFlightForm').on('submit', function (e) {
+                e.preventDefault();
+
+                var noviLet = {
+                    Aviokompanija: $('#aviokompanija').val(),
+                    PolaznaDestinacija: $('#novaPolaznaDestinacija').val(),
+                    OdredisnaDestinacija: $('#odredisnaDestinacija').val(),
+                    DatumVremePolaska: $('#datumVremePolaska').val(),
+                    DatumVremeDolaska: $('#datumVremeDolaska').val(),
+                    BrojSlobodnihMesta: $('#brojSlobodnihMesta').val(),
+                    Cena: $('#cena').val()
+                };
+
+                $.ajax({
+                    url: 'api/Letovi/dodajLet',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(noviLet),
+                    success: function (response) {
+                        alert('Let je uspešno dodat.');
+                        // Očistiti formu
+                        $('#addFlightForm')[0].reset();
+                        // Opcionalno: Osvežiti listu letova
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error: ' + error);
+                    }
+                });
+            });
+        });
+
+        function filtrirajLetove(filterOrder) {
+            $.ajax({
+                url: 'http://localhost:62378/api/Letovi/filtrirajAdmin',
+                method: 'GET',
+                data: { filterOrder: filterOrder },
+                success: function (data) {
+                    var tableBody = $('#filterResultsTable tbody');
+                    tableBody.empty();
+                    data.forEach(function (let) {
+                        var row = '<tr>' + 
+                            '<td><a href="letAdmin.html?id=' + encodeURIComponent(let.LetID) + '">' + let.LetID + '</a></td>' +
+                            '<td>' + let.Aviokompanija + '</td>' +
+                            '<td>' + let.PolaznaDestinacija + '</td>' +
+                            '<td>' + let.OdredisnaDestinacija + '</td>' +
+                            '<td>' + new Date(let.DatumVremePolaska).toLocaleString() + '</td>' +
+                            '<td>' + new Date(let.DatumVremeDolaska).toLocaleString() + '</td>' +
+                            '<td>' + let.BrojSlobodnihMesta + '</td>' +
+                            '<td>' + let.BrojZauzetihMesta + '</td>' +
+                            '<td>' + let.Cena + '</td>' +
+                            '<td>' + let.Status + '</td>' +
+                            '</tr>';
+                        tableBody.append(row);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error: ' + error);
+                }
+            });
+        }
+
+        function searchFlights(formData) {
+            $.ajax({
+                url: 'api/Letovi/SearchAdmin',
+                method: 'GET',
+                data: formData,
+                success: function (data) {
+                    var tableBody = $('#searchFlightResultsTable tbody');
+                    tableBody.empty();
+                    data.forEach(function (let) {
+                        var row = '<tr>' +
+                            '<td>' + let.Aviokompanija + '</td>' +
+                            '<td>' + let.PolaznaDestinacija + '</td>' +
+                            '<td>' + let.OdredisnaDestinacija + '</td>' +
+                            '<td>' + new Date(let.DatumVremePolaska).toLocaleString() + '</td>' +
+                            '<td>' + new Date(let.DatumVremeDolaska).toLocaleString() + '</td>' +
+                            '<td>' + let.BrojSlobodnihMesta + '</td>' +
+                            '<td>' + let.BrojZauzetihMesta + '</td>' +
+                            '<td>' + let.Cena + '</td>' +
+                            '<td>' + let.Status + '</td>' +
+                            '</tr>';
+                        tableBody.append(row);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error: ' + error);
+                }
+            });
+        }
+
+        function loadAviokompanije() {
+            $.ajax({
+                url: 'api/Aviokompanije',
+                method: 'GET',
+                success: function (data) {
+                    var dropdown = $('#aviokompanija');
+                    dropdown.empty();
+                    data.forEach(function (kompanija) {
+                        dropdown.append('<option value="' + kompanija.Naziv + '">' + kompanija.Naziv + '</option>');
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error: ' + error);
+                }
+            });
+        }
+
+    </script>
+</head>
+<body>
+    <div class="header">
+        <a href="kompanijeAdmin.html">Upravljaj aviokompanijama</a>
+        <a href="letoviAdmin.html">Upravljaj letovima</a>
+        <a href="rezervacijeAdmin.html">Upravljaj rezervacijama</a>
+        <a href="recenzijeAdmin.html">Odobri recenzije</a>
+        <a href="profilAdmin.html">Uredi profil</a>
+        <a href="indexAdmin.html">Pocetna</a>
+        <button onclick="window.location.href='prijava.html'">Prijava</button>
+        <button onclick="window.location.href='registracija.html'">Registracija</button>
+        <button onclick="window.location.href='index.html'">Odjavi se</button>
+    </div>
+
+    <div class="container">
+        <h2>Letovi</h2>
+        <select id="filterOrder" class="form-control">
+            <option value="Aktivan">Aktivan</option>
+            <option value="Otkazan">Otkazan</option>
+            <option value="Zavrsen">Završen</option>
+            <option value="Obrisan">Obrisan</option>
+        </select>
+
+        <table class="table" id="filterResultsTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Aviokompanija</th>
+                    <th>Polazna Destinacija</th>
+                    <th>Destinacija Dolaska</th>
+                    <th>Datum Polaska</th>
+                    <th>Datum Dolaska</th>
+                    <th>Broj slobodnih mesta</th>
+                    <th>Broj zauzetih mesta</th>
+                    <th>Cena</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dinamički sadržaj -->
+            </tbody>
+        </table>
+
+        <h2>Pretraga letova</h2>
+        <form id="searchFlightForm">
+            <div class="form-group">
+                <label for="polaznaDestinacija">Polazna Destinacija:</label>
+                <input type="text" class="form-control" id="polaznaDestinacija" name="polaznaDestinacija">
+            </div>
+            <div class="form-group">
+                <label for="destinacijaDolaska">Destinacija Dolaska:</label>
+                <input type="text" class="form-control" id="destinacijaDolaska" name="destinacijaDolaska">
+            </div>
+            <div class="form-group">
+                <label for="datumPolaska">Datum Polaska:</label>
+                <input type="date" class="form-control" id="datumPolaska" name="datumPolaska">
+            </div>
+            <div class="form-group">
+                <label for="datumPolaska">Datum Dolaska:</label>
+                <input type="date" class="form-control" id="datumDolaska" name="datumDolaska">
+            </div>
+            <button type="submit" class="btn btn-primary">Pretraga</button>
+            <button type="button" class="btn btn-primary" id="resetButton">Poništi</button>
+        </form>
+
+        <h2>Rezultati pretrage letova</h2>
+        <table class="table" id="searchFlightResultsTable">
+            <thead>
+                <tr>
+                    <th>Aviokompanija</th>
+                    <th>Polazna Destinacija</th>
+                    <th>Destinacija Dolaska</th>
+                    <th>Datum Polaska</th>
+                    <th>Datum Dolaska</th>
+                    <th>Broj slobodnih mesta</th>
+                    <th>Broj zauzetih mesta</th>
+                    <th>Cena</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dinamički sadržaj -->
+            </tbody>
+        </table>
+
+        <h2>Dodaj novi let</h2>
+        <form id="addFlightForm">
+            <div class="form-group">
+                <label for="aviokompanija">Aviokompanija:</label>
+                <select class="form-control" id="aviokompanija" name="aviokompanija" required>
+                    <!-- Ovde će se dinamički puniti aviokompanije -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="novaPolaznaDestinacija">Polazna Destinacija:</label>
+                <input type="text" class="form-control" id="novaPolaznaDestinacija" name="polaznaDestinacija" required>
+            </div>
+            <div class="form-group">
+                <label for="odredisnaDestinacija">Odredišna Destinacija:</label>
+                <input type="text" class="form-control" id="odredisnaDestinacija" name="odredisnaDestinacija" required>
+            </div>
+            <div class="form-group">
+                <label for="datumVremePolaska">Datum i vreme polaska:</label>
+                <input type="datetime-local" class="form-control" id="datumVremePolaska" name="datumVremePolaska" required>
+            </div>
+            <div class="form-group">
+                <label for="datumVremeDolaska">Datum i vreme dolaska:</label>
+                <input type="datetime-local" class="form-control" id="datumVremeDolaska" name="datumVremeDolaska" required>
+            </div>
+            <div class="form-group">
+                <label for="brojSlobodnihMesta">Broj slobodnih mesta:</label>
+                <input type="number" min="0" step="1" class="form-control" id="brojSlobodnihMesta" name="brojSlobodnihMesta" required>
+            </div>
+            <div class="form-group">
+                <label for="cena">Cena:</label>
+                <input type="number" min="0" step="0.01" class="form-control" id="cena" name="cena" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Dodaj Let</button>
+        </form>
+
+
+    </div>
+</body>
+</html>

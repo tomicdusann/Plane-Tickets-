@@ -1,0 +1,290 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moje Rezervacije</title>
+    <link rel="stylesheet" href="css/custom-style1.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Kada se promeni izbor filtera
+            $('#filterStatus').change(function () {
+                var filterStatus = $(this).val();
+                filtrirajRezervacije(filterStatus);
+            });
+
+
+            ucitajLetove();
+            ucitajRezervacije(); // rezervacije spremne za otkazivanje
+
+            // Kreiraj novu rezervaciju
+            $('#reservationForm').submit(function (event) {
+                event.preventDefault();
+                var letID = $('#letSelect').val();
+                var brojPutnika = $('#brojPutnika').val();
+                kreirajRezervaciju(letID, brojPutnika);
+            });
+
+            // Otkazi rezervaciju
+            $('#reservationOtkazForm').submit(function (event) {
+                event.preventDefault();
+                var rezervacijaID = $('#rezervacijaSelect').val();
+                RezervacijuSmestiZaOtkaz(rezervacijaID);
+            });
+        });
+
+        function filtrirajRezervacije(filterStatus) {
+            $.ajax({
+                url: 'http://localhost:62378/api/Korisnici/filtrirajRezervacije',
+                method: 'GET',
+                data: { filterStatus: filterStatus },
+                success: function (data) {
+                    console.log(data);
+
+                    var tableBody = $('#filterResultsTable tbody');
+                    tableBody.empty();
+                    data.forEach(function (rezervacija) {
+                        var row = '<tr>' +
+                            '<td><a href="aviokompanija.html?naziv=' + encodeURIComponent(rezervacija.Let.Aviokompanija) + '">' + rezervacija.Let.Aviokompanija +'</a></td>' +
+                            '<td>' + rezervacija.Let.PolaznaDestinacija + '</td>' +
+                            '<td>' + rezervacija.Let.OdredisnaDestinacija + '</td>' +
+                            '<td>' + new Date(rezervacija.Let.DatumVremePolaska).toLocaleString() + '</td>' +
+                            '<td>' + new Date(rezervacija.Let.DatumVremeDolaska).toLocaleString() + '</td>' +
+                            '<td>' + rezervacija.BrojPutnika + '</td>' +
+                            '<td>' + rezervacija.UkupnaCena.toFixed(2) + ' RSD</td>' +
+                            '<td>' + rezervacija.Status + '</td>' +
+                            '</tr>';
+                        tableBody.append(row);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error: ' + error);
+                }
+            });
+        }
+
+        function ucitajLetove() {
+            $.ajax({
+                url: 'api/Letovi', // URL za dobijanje aktivnih letova
+                method: 'GET',
+                success: function (data) {      //Aviokompanija - PolaznaDestinacija do OdredisnaDestinacija - Datum
+                    console.log('Učitani letovi:', data);
+                    var letSelect = $('#letSelect');
+                    letSelect.empty();
+                    data.forEach(function (let) {
+                        letSelect.append('<option value="' + let.LetID + '">' +
+                            let.Aviokompanija + ' - ' +
+                            let.PolaznaDestinacija + ' do ' +
+                            let.OdredisnaDestinacija + ' - ' + ' [raspolozivih mesta]: ' + let.BrojSlobodnihMesta + ' - ' +
+                            new Date(let.DatumVremePolaska).toLocaleDateString() +
+                            '</option>');
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error: ' + error);
+                }
+            });
+        }
+
+        function kreirajRezervaciju(letID, brojPutnika) {
+            $.ajax({
+                url: 'api/Rezervacije/kreiraj',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    LetID: letID,
+                    BrojPutnika: brojPutnika
+                }),
+                success: function (response) {
+                    alert('Rezervacija uspešno kreirana!');
+                    $('#reservationForm')[0].reset();
+                    filtrirajRezervacije('Kreirana');
+                    ucitajLetove();
+                    ucitajRezervacije();
+                },
+                error: function (xhr, status, error) {
+                    if (xhr.status === 400) {
+                        console.error('Error: ' + error);
+                        alert('Kreiranje rezervacije nije uspelo.');
+                    }
+                    else {
+                        alert("Došlo je do neočekivane greške.");
+                    }
+                    
+                }
+            });
+        }
+
+        // Popunjavanje rezervacija sa statusom KREIRANA ili ODOBRENA
+        /*function loadRezervacije() {
+            $.ajax({
+                url: '/api/rezervacije', // Putanja do API-a koji vraća sve rezervacije
+                method: 'GET',
+                success: function (rezervacije) {
+                    let select = $('#selectRezervacija');
+                    select.empty();
+                    select.append('<option value="">Izaberite rezervaciju</option>');
+                    rezervacije.forEach(function (rezervacija) {
+                        if (rezervacija.Status === 'Kreirana' || rezervacija.Status === 'Odobrena') {
+                            select.append(`<option value="${rezervacija.RezervacijaID}">${rezervacija.Let.Destinacija} (${rezervacija.Status})</option>`);
+                        }
+                    });
+                },
+                error: function (error) {
+                    console.error('Greška prilikom učitavanja rezervacija:', error);
+                }
+            });
+        }*/
+
+        function ucitajRezervacije() {
+            $.ajax({
+                url: 'api/Rezervacije/MoguSeOtkazati', // URL za dobijanje aktivnih letova
+                method: 'GET',
+                success: function (data) {      //Aviokompanija - PolaznaDestinacija do OdredisnaDestinacija - Datum
+                    console.log('Učitane rezervacije:', data);
+                    var rezervacijaSelect = $('#rezervacijaSelect');
+                    rezervacijaSelect.empty();
+                    data.forEach(function (rezervacija) {
+                        rezervacijaSelect.append('<option value="' + rezervacija.RezervacijaID + '">' +
+                            rezervacija.Let.Aviokompanija + ' - ' +
+                            rezervacija.Let.PolaznaDestinacija + ' od ' +
+                            rezervacija.Let.OdredisnaDestinacija + ' - ' + ' [raspolozivih mesta]: ' + rezervacija.Let.BrojSlobodnihMesta + ' - ' +
+                            new Date(rezervacija.Let.DatumVremePolaska).toLocaleDateString() +
+                            '</option>');
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error: ' + error);
+                }
+            });
+        }
+
+        // Funkcija za otkazivanje rezervacije
+        /*function otkaziRezervaciju() {
+            let rezervacijaID = $('#selectRezervacija').val();
+            if (rezervacijaID) {
+                $.ajax({
+                    url: '/api/rezervacije/' + rezervacijaID + '/otkazi',
+                    method: 'POST',
+                    success: function () {
+                        alert('Rezervacija uspešno otkazana.');
+                        loadRezervacije(); // Osvežavanje liste rezervacija
+                    },
+                    error: function (error) {
+                        console.error('Greška prilikom otkazivanja rezervacije:', error);
+                        alert('Greška prilikom otkazivanja rezervacije.');
+                    }
+                });
+            } else {
+                alert('Izaberite rezervaciju koju želite da otkažete.');
+            }
+        }*/
+
+        function RezervacijuSmestiZaOtkaz(rezervacijaID) {
+            $.ajax({
+                url: 'api/Rezervacije/smestiZaOtkaz',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    RezervacijaID: rezervacijaID
+                }),
+                success: function (response) {
+                    alert('Rezervacija ce biti otkazana kada podrska prihvati zahtev za otkaz!');
+                    $('#reservationOtkazForm')[0].reset();
+                    filtrirajRezervacije('Kreirana');
+                    ucitajLetove();
+                    ucitajRezervacije();
+                },
+                error: function (xhr, status, error) {
+                    if (xhr.status === 400) { // 400 je statusni kod za BadRequest
+                        alert('Zahtev za otkaz rezervacije nije uspeo.');
+                    } else {
+                        alert("Došlo je do nepoznate greške.");
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="header">
+        <a href="kompanijeRegular.html">Aviokompanije</a>
+        <a href="profilRegular.html">Uredi profil</a>
+        <a href="rezervacijeRegular.html">Moje rezervacije</a>
+        <button onclick="window.location.href='prijava.html'">Prijava</button>
+        <button onclick="window.location.href='registracija.html'">Registracija</button>
+        <button onclick="window.location.href='index.html'">Odjavi se</button>
+    </div>
+
+    <div class="container">
+
+        <!-- Sortiranje korisnickih rezervacija -->
+        <h2>Filtriranje Rezervacija</h2>
+        <select id="filterStatus" class="form-control">
+            <option value="Kreirana">Kreirana</option>
+            <option value="Odobrena">Odobrena</option>
+            <option value="Otkazana">Otkazana</option>
+            <option value="Zavrsena">Završena</option>
+        </select>
+
+        <table class="table" id="filterResultsTable">
+            <thead>
+                <tr>
+                    <th>Aviokompanija</th>
+                    <th>Polazna destinacija</th>
+                    <th>Odredišna destinacija</th>
+                    <th>Datum polaska</th>
+                    <th>Datum dolaska</th>
+                    <th>Broj putnika</th>
+                    <th>Ukupna cena</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dinamički sadržaj -->
+            </tbody>
+        </table>
+
+        <!-- Forma za kreiranje rezervacije -->
+        <h2>Kreiraj novu rezervaciju</h2>
+        <form id="reservationForm">
+            <div class="form-group">
+                <label for="letSelect">Izaberi let:</label>
+                <select id="letSelect" name="letSelect" required>
+                    <option value="">Izaberite let</option>
+                    <!-- Opcije će biti učitane dinamički -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="brojPutnika">Broj putnika:</label>
+                <input type="number" id="brojPutnika" name="brojPutnika" required min="1">
+            </div>
+            <button type="submit" class="btn btn-primary">Rezerviši let</button>
+        </form>
+
+        <!--<div id="otkazi-rezervaciju">
+        <h2>Otkazivanje rezervacije</h2>
+        <label for="selectRezervacija">Izaberite rezervaciju:</label>
+        <select id="selectRezervacija">
+            <option value="">Izaberite rezervaciju</option>
+            <!-- Opcije će biti dinamički dodate putem JavaScript-a
+        </select>
+        <button id="btnOtkaziRezervaciju" onclick="otkaziRezervaciju()">Otkazi rezervaciju</button>
+    </div>-->
+
+        <h2>Otkazivanje rezervacija:</h2>
+        <form id="reservationOtkazForm">
+            <div class="form-group">
+                <label for="rezervacijaSelect">Izaberi rezervaciju:</label>
+                <select id="rezervacijaSelect" name="rezervacijaSelect" required>
+                    <option value="">Izaberite rezervaciju</option>
+                    <!-- Opcije će biti učitane dinamički -->
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Posalji zahtev za otkaz</button>
+        </form>
+
+    </div>
+</body>
+</html>

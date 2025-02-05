@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spisak Aviokompanija</title>
+    <link rel="stylesheet" href="css/custom-style2.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function loadAviokompanije() {
+                $.ajax({
+                    url: 'api/Aviokompanije', // Endpoint za preuzimanje svih aviokompanija
+                    method: 'GET',
+                    success: function (data) {
+                        var tableBody = $('#aviokompanijeTable tbody');
+                        tableBody.empty();
+                        data.forEach(function (aviokompanija) {
+                            var row = `
+                                <tr>
+                                    <td><a href="aviokompanija.html?naziv=${encodeURIComponent(aviokompanija.Naziv)}">${aviokompanija.Naziv}</a></td>
+                                    <td>${aviokompanija.KontaktInformacije}</td>
+                                </tr>`;
+                            tableBody.append(row);
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error: ' + error);
+                    }
+                });
+            }
+
+            loadAviokompanije();
+        });
+    </script>
+</head>
+<body>
+    <div class="header">
+        <a href="kompanije.html">Aviokompanije</a>
+        <a href="Index.html">Pocetna</a>
+        <button onclick="window.location.href='prijava.html'">Prijava</button>
+        <button onclick="window.location.href='registracija.html'">Registracija</button>
+    </div>
+
+    <div class="container">
+        <h2>Spisak Aviokompanija</h2>
+        <table id="aviokompanijeTable">
+            <thead>
+                <tr>
+                    <th>Naziv Aviokompanije</th>
+                    <th>Kontakt Informacije</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dinamički sadržaj aviokompanija -->
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

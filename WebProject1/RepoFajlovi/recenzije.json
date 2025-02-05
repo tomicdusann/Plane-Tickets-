@@ -1,0 +1,32 @@
+[
+  {
+    "RecenzijaID": 0,
+    "Recezent": null,
+    "Aviokompanija": null,
+    "Naslov": null,
+    "Sadrzaj": null,
+    "Slika": null,
+    "Status": "Kreirana",
+    "StatusRecenzije": 0
+  },
+  {
+    "RecenzijaID": 0,
+    "Recezent": null,
+    "Aviokompanija": null,
+    "Naslov": null,
+    "Sadrzaj": null,
+    "Slika": null,
+    "Status": "Kreirana",
+    "StatusRecenzije": 0
+  },
+  {
+    "RecenzijaID": 97474253,
+    "Recezent": "testkorisnik",
+    "Aviokompanija": "Test123",
+    "Naslov": "Druga recenzija",
+    "Sadrzaj": "Ova ce biti odbijena.",
+    "Slika": null,
+    "Status": "Odbijena",
+    "StatusRecenzije": 2
+  }
+]

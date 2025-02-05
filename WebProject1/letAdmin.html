@@ -1,0 +1,174 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalji Leta</title>
+    <link rel="stylesheet" href="css/custom-style1.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function loadLetData() {
+                var urlParams = new URLSearchParams(window.location.search);
+                var letID = urlParams.get('id');
+
+                if (letID) {
+                    $.ajax({
+                        url: 'api/Letovi/' + encodeURIComponent(letID),
+                        method: 'GET',
+                        success: function (data) {
+                            $('#aviokompanija').text(data.Aviokompanija);
+                            $('#polaznaDestinacija').text(data.PolaznaDestinacija);
+                            $('#odredisnaDestinacija').text(data.OdredisnaDestinacija);
+                            $('#datumVremePolaska').text(new Date(data.DatumVremePolaska).toLocaleString());
+                            $('#datumVremeDolaska').text(new Date(data.DatumVremeDolaska).toLocaleString());
+                            $('#brojSlobodnihMesta').text(data.BrojSlobodnihMesta);
+                            $('#brojZauzetihMesta').text(data.BrojZauzetihMesta);
+                            $('#cena').text(data.Cena);
+                            $('#status').text(data.Status);
+
+                            // Predučitavanje podataka u formu
+                            $('#aviokompanijaInput').val(data.Aviokompanija);
+                            $('#polaznaDestinacijaInput').val(data.PolaznaDestinacija).prop('readonly', true); // readonly
+                            $('#odredisnaDestinacijaInput').val(data.OdredisnaDestinacija).prop('readonly', true); // readonly
+                            $('#datumVremePolaskaInput').val(new Date(data.DatumVremePolaska).toISOString().slice(0, -1));
+                            $('#datumVremeDolaskaInput').val(new Date(data.DatumVremeDolaska).toISOString().slice(0, -1));
+                            $('#brojSlobodnihMestaInput').val(data.BrojSlobodnihMesta);
+                            $('#cenaInput').val(data.Cena);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error: ' + error);
+                        }
+                    });
+                } else {
+                    console.error('Nema parametra id u URL-u.');
+                }
+            }
+
+            // Funkcija za čuvanje izmena
+            $('#saveButton').click(function () {
+                var letID = new URLSearchParams(window.location.search).get('id');
+                var updatedLet = {
+                    Aviokompanija: $('#aviokompanijaInput').val(),
+                    PolaznaDestinacija: $('#polaznaDestinacijaInput').val(),
+                    OdredisnaDestinacija: $('#odredisnaDestinacijaInput').val(),
+                    DatumVremePolaska: $('#datumVremePolaskaInput').val(),
+                    DatumVremeDolaska: $('#datumVremeDolaskaInput').val(),
+                    BrojSlobodnihMesta: $('#brojSlobodnihMestaInput').val(),
+                    Cena: $('#cenaInput').val()
+                };
+
+                $.ajax({
+                    url: 'api/Letovi/updateLet/' + encodeURIComponent(letID),
+                    method: 'PUT',  // Koristimo PUT za ažuriranje
+                    data: JSON.stringify(updatedLet),
+                    contentType: 'application/json',
+                    success: function (response) {
+                        alert('Podaci su uspešno sačuvani.');
+                        window.location.href = response.redirectUrl;
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error: ' + xhr.responseText);
+                        alert('Greška prilikom čuvanja promena.');
+                    }
+                });
+            });
+
+            // Funkcija za brisanje leta
+            $('#deleteButton').click(function () {
+                if (confirm('Da li ste sigurni da želite da obrišete ovaj let?')) {
+                    var letID = new URLSearchParams(window.location.search).get('id');
+                    $.ajax({
+                        url: 'api/Letovi/delete/' + encodeURIComponent(letID),
+                        method: 'DELETE',
+                        success: function (response) {
+                            alert('Let je uspešno obrisan.');
+                            window.location.href = 'letoviAdmin.html';
+                        },
+                        error: function (xhr, status, error) {
+                            if (xhr.Status === 400) {
+                                alert('Let ne moze biti obrisan.');
+                            }
+                        }
+                    });
+                }
+            });
+
+            loadLetData();
+        });
+    </script>
+</head>
+
+<body>
+    <div class="header">
+        <a href="kompanijeAdmin.html">Upravljaj aviokompanijama</a>
+        <a href="letoviAdmin.html">Upravljaj letovima</a>
+        <a href="rezervacijeAdmin.html">Upravljaj rezervacijama</a>
+        <a href="recenzijeAdmin.html">Odobri recenzije</a>
+        <a href="profilAdmin.html">Uredi profil</a>
+        <a href="indexAdmin.html">Pocetna</a>
+        <button onclick="window.location.href='prijava.html'">Prijava</button>
+        <button onclick="window.location.href='registracija.html'">Registracija</button>
+        <button onclick="window.location.href='index.html'">Odjavi se</button>
+    </div>
+
+    <div class="container">
+        <!--<h2 id="aviokompanija">Naziv Aviokompanije</h2>
+    <p id="polaznaDestinacija">Polazna Destinacija: </p>
+    <p id="odredisnaDestinacija">Odredišna Destinacija: </p>
+    <p id="datumVremePolaska">Datum i vreme Polaska: </p>
+    <p id="datumVremeDolaska">Datum i vreme Dolaska: </p>
+    <p id="brojSlobodnihMesta">Broj slobodnih mesta: </p>
+    <p id="brojZauzetihMesta">Broj zauzetih mesta: </p>
+    <p id="cena">Cena: </p>
+    <p id="status">Status: </p>-->
+        <p><strong>Aviokompanija:</strong> <span id="aviokompanija"></span></p>
+        <p><strong>Polazna destinacija:</strong> <span id="polaznaDestinacija"></span></p>
+        <p><strong>Odredišna destinacija:</strong> <span id="odredisnaDestinacija"></span></p>
+        <p><strong>Datum i vreme polaska:</strong> <span id="datumVremePolaska"></span></p>
+        <p><strong>Datum i vreme dolaska:</strong> <span id="datumVremeDolaska"></span></p>
+        <p><strong>Broj slobodnih mesta:</strong> <span id="brojSlobodnihMesta"></span></p>
+        <p><strong>Broj zauzetih mesta:</strong> <span id="brojZauzetihMesta"></span></p>
+        <p><strong>Cena:</strong> <span id="cena"></span></p>
+        <p><strong>Status:</strong> <span id="status"></span></p>
+
+        <br/>
+        <!-- Forma za izmenu leta -->
+        <h2>Izmeni Let</h2>
+        <form id="editForm">
+            <div class="form-group">
+                <label for="aviokompanijaInput">Aviokompanija:</label>
+                <input type="text" class="form-control" id="aviokompanijaInput" name="aviokompanijaInput" readonly>
+            </div>
+            <div class="form-group">
+                <label for="polaznaDestinacijaInput">Polazna Destinacija:</label>
+                <input type="text" class="form-control" id="polaznaDestinacijaInput" name="polaznaDestinacijaInput" readonly>
+            </div>
+            <div class="form-group">
+                <label for="odredisnaDestinacijaInput">Odredišna Destinacija:</label>
+                <input type="text" class="form-control" id="odredisnaDestinacijaInput" name="odredisnaDestinacijaInput" readonly>
+            </div>
+            <div class="form-group">
+                <label for="datumVremePolaskaInput">Datum i vreme polaska:</label>
+                <input type="datetime-local" class="form-control" id="datumVremePolaskaInput" name="datumVremePolaskaInput" required>
+            </div>
+            <div class="form-group">
+                <label for="datumVremeDolaskaInput">Datum i vreme dolaska:</label>
+                <input type="datetime-local" class="form-control" id="datumVremeDolaskaInput" name="datumVremeDolaskaInput" required>
+            </div>
+            <div class="form-group">
+                <label for="brojSlobodnihMestaInput">Broj slobodnih mesta:</label>
+                <input type="number" min="0" step="1" class="form-control" id="brojSlobodnihMestaInput" name="brojSlobodnihMestaInput" required>
+            </div>
+            <div class="form-group">
+                <label for="cenaInput">Cena:</label>
+                <input type="number" min="0" step="0.01" class="form-control" id="cenaInput" name="cenaInput" required>
+            </div>
+            <button type="button" class="btn btn-primary" id="saveButton">Sačuvaj Promene</button>
+            <button type="button" class="btn btn-primary" id="deleteButton">Izbriši Let</button>
+        </form>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,32 @@
+[
+  {
+    "KorisnikID": 0,
+    "KorisnickoIme": "petar1",
+    "Lozinka": "admin123",
+    "Ime": "Petar",
+    "Prezime": "Petrovic",
+    "Email": "pepe@gmail.com",
+    "DatumRodjenja": "2001-01-01T00:00:00",
+    "Pol": "Muski",
+    "PolKorisnika": 0,
+    "TipKorisnika": "Administrator",
+    "Tip": 1,
+    "ListaRezervacija": [],
+    "ListaLetova": []
+  },
+  {
+    "KorisnikID": 0,
+    "KorisnickoIme": "admin2",
+    "Lozinka": "admin223",
+    "Ime": "Milan",
+    "Prezime": "Milanovic",
+    "Email": "pepe@gmail.com",
+    "DatumRodjenja": "2001-02-02T00:00:00",
+    "Pol": "Muski",
+    "PolKorisnika": 0,
+    "TipKorisnika": "Administrator",
+    "Tip": 1,
+    "ListaRezervacija": [],
+    "ListaLetova": []
+  }
+]

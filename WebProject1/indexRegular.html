@@ -1,0 +1,297 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Rezervacija Avio Karata</title>
+    <link rel="stylesheet" href="css/custom-style1.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            //console.log('Jel ima neko ucitavanje skripte ovde?');
+
+            // Load and display active flights on page load
+            loadActiveFlights();
+
+            // Search form submit handler
+            $('#searchForm').submit(function (event) {
+                event.preventDefault();
+                var formData = $(this).serialize();
+                searchFlights(formData);
+            });
+
+            // Reset button click handler
+            $('#resetButton').click(function (event) {
+                event.preventDefault(); // Sprečava podnošenje forme prilikom klika na dugme
+                console.log('Reset dugme je kliknuto.'); // Provera klika na dugme
+                resetSearchForm();
+            });
+
+            // Sort order change handler
+            $('#sortOrder').change(function () {
+                var sortOrder = $(this).val();
+                sortFlights(sortOrder);
+            });
+
+            // Filtriraj letova po korisniku
+            $('#filterOrder').change(function () {
+                var filterOrder = $(this).val();
+                filtrirajLetove(filterOrder);
+            });
+        });
+
+        function loadActiveFlights() {
+            $.ajax({
+                url: 'api/Letovi',
+                method: 'GET',
+                success: function (data) {
+                    var tableBody = $('#letoviTable tbody');
+                    tableBody.empty();
+                    data.forEach(function (let) {
+                        var row = '<tr>' +
+                            '<td><a href="aviokompanija.html?naziv=' + encodeURIComponent(let.Aviokompanija) + '">' + let.Aviokompanija + '</a></td>' +
+                            '<td>' + let.PolaznaDestinacija + '</td>' +
+                            '<td>' + let.OdredisnaDestinacija + '</td>' +
+                            '<td>' + new Date(let.DatumVremePolaska).toLocaleString() + '</td>' +
+                            '<td>' + new Date(let.DatumVremeDolaska).toLocaleString() + '</td>' +
+                            '<td>' + let.BrojSlobodnihMesta + '</td>' +
+                            '<td>' + let.Cena + '</td>' +
+                            '</tr>';
+                        tableBody.append(row);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error: ' + error);
+                }
+            });
+        }
+
+        function resetSearchForm() {
+            console.log('Resetujem formu.'); // Provera da li se funkcija poziva
+
+            // Ručno resetovanje polja u formi
+            $('#polaznaDestinacija').val('');
+            $('#odredisnaDestinacija').val('');
+            $('#datumPolaska').val('');
+            $('#datumDolaska').val('');
+            $('#aviokompanija').val('');
+
+            // Prazni tabelu rezultata pretrage
+            $('#searchResultsTable tbody').empty();
+        }
+
+        function searchFlights(formData) {
+            $.ajax({
+                url: 'api/Letovi/Search',
+                method: 'GET',
+                data: formData,
+                success: function (data) {
+                    var tableBody = $('#searchResultsTable tbody');
+                    tableBody.empty();
+                    data.forEach(function (let) {
+                        var row = '<tr>' +
+                            '<td><a href="aviokompanija.html?naziv=' + encodeURIComponent(let.Aviokompanija) + '">' + let.Aviokompanija + '</a></td>' +
+                            '<td>' + let.PolaznaDestinacija + '</td>' +
+                            '<td>' + let.OdredisnaDestinacija + '</td>' +
+                            '<td>' + new Date(let.DatumVremePolaska).toLocaleString() + '</td>' +
+                            '<td>' + new Date(let.DatumVremeDolaska).toLocaleString() + '</td>' +
+                            '<td>' + let.BrojSlobodnihMesta + '</td>' +
+                            '<td>' + let.Cena + '</td>' +
+                            '</tr>';
+                        tableBody.append(row);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error: ' + error);
+                }
+            });
+        }
+
+        function sortFlights(sortOrder) {
+            $.ajax({
+                url: 'http://localhost:62378/api/Letovi/Sort',
+                method: 'GET',
+                data: { sortOrder: sortOrder },
+                success: function (data) {
+                    console.log(data); // Obrada uspešnog odgovora
+
+                    var tableBody = $('#sortResultsTable tbody');
+                    tableBody.empty();
+                    data.forEach(function (let) {
+                        var row = '<tr>' +
+                            '<td><a href="aviokompanija.html?naziv=' + encodeURIComponent(let.Aviokompanija) + '">' + let.Aviokompanija + '</a></td>' +
+                            '<td>' + let.PolaznaDestinacija + '</td>' +
+                            '<td>' + let.OdredisnaDestinacija + '</td>' +
+                            '<td>' + new Date(let.DatumVremePolaska).toLocaleString() + '</td>' +
+                            '<td>' + new Date(let.DatumVremeDolaska).toLocaleString() + '</td>' +
+                            '<td>' + let.BrojSlobodnihMesta + '</td>' +
+                            '<td>' + let.Cena + '</td>' +
+                            '</tr>';
+                        tableBody.append(row);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error: ' + error);
+                }
+            });
+        }
+
+        function filtrirajLetove(filterOrder) {
+            $.ajax({
+                url: 'http://localhost:62378/api/Korisnici/filtriraj',
+                method: 'GET',
+                data: { filterOrder: filterOrder },
+                success: function (data) {
+                    console.log(data);
+
+                    var tableBody = $('#filterResultsTable tbody');
+                    tableBody.empty();
+                    data.forEach(function (let) {
+                        var row = '<tr>' +
+                            '<td><a href="aviokompanija.html?naziv=' + encodeURIComponent(let.Aviokompanija) + '">' + let.Aviokompanija + '</a></td>' +
+                            '<td>' + let.PolaznaDestinacija + '</td>' +
+                            '<td>' + let.OdredisnaDestinacija + '</td>' +
+                            '<td>' + new Date(let.DatumVremePolaska).toLocaleString() + '</td>' +
+                            '<td>' + new Date(let.DatumVremeDolaska).toLocaleString() + '</td>' +
+                            '<td>' + let.BrojSlobodnihMesta + '</td>' +
+                            '<td>' + let.Cena + '</td>' +
+                            '</tr>';
+                        tableBody.append(row);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error: ' + error);
+                }
+            });
+        }
+    
+    </script>
+</head>
+<body>
+    <div class="header">
+        <a href="kompanijeRegular.html">Aviokompanije</a>
+        <a href="profilRegular.html">Uredi profil</a>
+        <a href="rezervacijeRegular.html">Moje rezervacije</a>
+        <a href="indexRegular.html">Pocetna</a>
+        <button onclick="window.location.href='prijava.html'">Prijava</button>
+        <button onclick="window.location.href='registracija.html'">Registracija</button>
+        <button onclick="window.location.href='index.html'">Odjavi se</button>
+    </div>
+
+    <div class="container">
+        <!-- Početna stranica -->
+        <h2>Aktivni Letovi</h2>
+        <table class="table" id="letoviTable">
+            <thead>
+                <tr>
+                    <th>Aviokompanija</th>
+                    <th>Polazna destinacija</th>
+                    <th>Odredišna destinacija</th>
+                    <th>Datum polaska</th>
+                    <th>Datum dolaska</th>
+                    <th>Broj slobodnih mesta</th>
+                    <th>Cena</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dinamički sadržaj -->
+            </tbody>
+        </table>
+
+        <!-- Pretraga letova -->
+        <h2>Pretraga Letova</h2>
+        <form id="searchForm">
+            <div class="form-group">
+                <label for="polaznaDestinacija">Polazna destinacija:</label>
+                <input type="text" class="form-control" id="polaznaDestinacija" name="polaznaDestinacija">
+            </div>
+            <div class="form-group">
+                <label for="odredisnaDestinacija">Odredišna destinacija:</label>
+                <input type="text" class="form-control" id="odredisnaDestinacija" name="odredisnaDestinacija">
+            </div>
+            <div class="form-group">
+                <label for="datumPolaska">Datum polaska:</label>
+                <input type="date" class="form-control" id="datumPolaska" name="datumPolaska">
+            </div>
+            <div class="form-group">
+                <label for="datumDolaska">Datum dolaska:</label>
+                <input type="date" class="form-control" id="datumDolaska" name="datumDolaska">
+            </div>
+            <div class="form-group">
+                <label for="aviokompanija">Aviokompanija:</label>
+                <input type="text" class="form-control" id="aviokompanija" name="aviokompanija">
+            </div>
+            <button type="submit" class="btn btn-primary">Pretraga</button>
+            <button type="button" class="btn btn-primary" id="resetButton">Poništi</button>
+        </form>
+
+        <h2>Rezultati pretrage</h2>
+        <table class="table" id="searchResultsTable">
+            <thead>
+                <tr>
+                    <th>Aviokompanija</th>
+                    <th>Polazna destinacija</th>
+                    <th>Odredišna destinacija</th>
+                    <th>Datum polaska</th>
+                    <th>Datum dolaska</th>
+                    <th>Broj slobodnih mesta</th>
+                    <th>Cena</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dinamički sadržaj -->
+            </tbody>
+        </table>
+
+        <!-- Sortiranje letova -->
+        <h2>Sortiranje Letova</h2>
+        <select id="sortOrder" class="form-control">
+            <option value="cena_asc">Cena rastuće</option>
+            <option value="cena_desc">Cena opadajuće</option>
+        </select>
+
+        <table class="table" id="sortResultsTable">
+            <thead>
+                <tr>
+                    <th>Aviokompanija</th>
+                    <th>Polazna destinacija</th>
+                    <th>Odredišna destinacija</th>
+                    <th>Datum polaska</th>
+                    <th>Datum dolaska</th>
+                    <th>Broj slobodnih mesta</th>
+                    <th>Cena</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dinamički sadržaj -->
+            </tbody>
+        </table>
+
+        <!-- Sortiranje korisnickih letova -->
+        <h2>Filtriranje Letova</h2>
+        <select id="filterOrder" class="form-control">
+            <option value="aktivan">Aktivan</option>
+            <option value="zavrsen">Zavrsen</option>
+            <option value="otkazan">Otkazan</option>
+        </select>
+
+        <table class="table" id="filterResultsTable">
+            <thead>
+                <tr>
+                    <th>Aviokompanija</th>
+                    <th>Polazna destinacija</th>
+                    <th>Odredišna destinacija</th>
+                    <th>Datum polaska</th>
+                    <th>Datum dolaska</th>
+                    <th>Broj slobodnih mesta</th>
+                    <th>Cena</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dinamički sadržaj -->
+            </tbody>
+        </table>
+
+    </div>
+</body>
+</html>

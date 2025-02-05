@@ -1,0 +1,133 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalji Aviokompanije</title>
+    <link rel="stylesheet" href="css/custom-style1.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function loadAviokompanijaData() {
+                var urlParams = new URLSearchParams(window.location.search);
+                var aviokompanijaNaziv = urlParams.get('naziv');
+
+                if (aviokompanijaNaziv) {
+                    $.ajax({
+                        url: 'api/Aviokompanije/naziv/' + encodeURIComponent(aviokompanijaNaziv),
+                        method: 'GET',
+                        success: function (data) {
+                            $('#naziv').text(data.Naziv);
+                            $('#adresa').text(data.Adresa);
+                            $('#kontaktInformacije').text(data.KontaktInformacije);
+
+                            // Predučitavanje podataka u formu
+                            $('#nazivInput').val(data.Naziv);
+                            $('#adresaInput').val(data.Adresa);
+                            $('#kontaktInput').val(data.KontaktInformacije);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error: ' + error);
+                        }
+                    });
+                } else {
+                    console.error('Nema parametra naziv u URL-u.');
+                }
+            }
+
+            // Funkcija za čuvanje izmena
+            $('#saveButton').click(function () {
+                var oldAviokompanijaNaziv = $('#naziv').text();  // Uzimamo stari naziv iz prikaza
+                var updatedAviokompanija = {
+                    StariNaziv: oldAviokompanijaNaziv,  // Dodajemo stari naziv
+                    NoviNaziv: $('#nazivInput').val(),  // Novi naziv iz forme
+                    Adresa: $('#adresaInput').val(),
+                    KontaktInformacije: $('#kontaktInput').val()
+                };
+
+                $.ajax({
+                    url: 'api/Aviokompanije/updateKompaniju',
+                    method: 'PUT',  // Koristimo PUT za ažuriranje
+                    data: JSON.stringify(updatedAviokompanija),
+                    contentType: 'application/json',
+                    success: function (response) {
+                        alert('Podaci su uspešno sačuvani.');
+                        window.location.href = response.redirectUrl;
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error: ' + xhr.responseText);
+                        alert('Greška prilikom čuvanja promena.');
+                    }
+                });
+            });
+
+
+            // Funkcija za brisanje aviokompanije
+            $('#deleteButton').click(function () {
+                if (confirm('Da li ste sigurni da želite da obrišete ovu aviokompaniju?')) {
+                    var aviokompanijaNaziv = $('#naziv').text();
+                    console.log('Naziv aviokompanije za brisanje: ' + aviokompanijaNaziv);
+                    $.ajax({
+                        url: 'api/Aviokompanije/delete/' + encodeURIComponent(aviokompanijaNaziv),
+                        method: 'DELETE',
+                        success: function (response) {
+                            alert('Aviokompanija je uspešno obrisana.');
+                            window.location.href = 'kompanijeAdmin.html';
+                        },
+                        error: function (xhr, status, error) {
+                            if (xhr.status === 400) {
+                                alert('Kompanija trenutno ne moze biti obrisana.');
+                            } else {
+                                console.error('Error: ' + error);
+                            }
+                        }
+                    });
+                }
+            });
+
+            loadAviokompanijaData();
+        });
+    </script>
+</head>
+
+<body>
+    <div class="header">
+        <a href="kompanijeAdmin.html">Upravljaj aviokompanijama</a>
+        <a href="letoviAdmin.html">Upravljaj letovima</a>
+        <a href="rezervacijeAdmin.html">Upravljaj rezervacijama</a>
+        <a href="recenzijeAdmin.html">Odobri recenzije</a>
+        <a href="profilAdmin.html">Uredi profil</a>
+        <a href="indexAdmin.html">Pocetna</a>
+        <button onclick="window.location.href='prijava.html'">Prijava</button>
+        <button onclick="window.location.href='registracija.html'">Registracija</button>
+        <button onclick="window.location.href='index.html'">Odjavi se</button>
+    </div>
+
+    <div class="container">
+        <h2 id="naziv">Naziv Aviokompanije</h2>
+        <p id="adresa">Adresa: </p>
+        <p id="kontaktInformacije">Kontakt informacije: </p>
+
+        <!-- Forma za izmenu aviokompanije -->
+        <h3>Izmeni Aviokompaniju</h3>
+        <form id="editForm">
+            <div class="form-group">
+                <label for="nazivInput">Naziv Aviokompanije:</label>
+                <input type="text" class="form-control" id="nazivInput" name="nazivInput" required>
+            </div>
+            <div class="form-group">
+                <label for="adresaInput">Adresa:</label>
+                <input type="text" class="form-control" id="adresaInput" name="adresaInput" required>
+            </div>
+            <div class="form-group">
+                <label for="kontaktInput">Kontakt Informacije:</label>
+                <input type="text" class="form-control" id="kontaktInput" name="kontaktInput" required>
+            </div>
+            <button type="button" class="btn btn-primary" id="saveButton">Sačuvaj Promene</button>
+            <button type="button" class="btn btn-primary" id="deleteButton">Izbriši Aviokompaniju</button>
+        </form>
+    </div>
+</body>
+
+</html>

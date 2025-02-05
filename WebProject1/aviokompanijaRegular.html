@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalji Aviokompanije</title>
+    <link rel="stylesheet" href="css/custom-style2.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function loadAviokompanijaData() {
+                var urlParams = new URLSearchParams(window.location.search);
+                var aviokompanijaNaziv = urlParams.get('naziv');
+
+                // Dodaj console.log ovde
+                console.log('Naziv aviokompanije iz URL-a:', aviokompanijaNaziv);
+
+                if (aviokompanijaNaziv) {
+                    $.ajax({
+                        url: 'api/Aviokompanije/naziv/' + encodeURIComponent(aviokompanijaNaziv),
+                        method: 'GET',
+                        success: function (data) {
+                            $('#naziv').text(data.Naziv);
+                            $('#adresa').text(data.Adresa);
+                            $('#kontaktInformacije').text(data.KontaktInformacije);
+
+                            // Ukloni stari sadržaj tabele
+                            $('#letoviTable tbody').empty();
+
+                            // Prikaz letova u tabeli
+                            data.ListaLetova.forEach(function (let) {
+                                var row = `
+                                        <tr>
+                                            <td>${let.LetID}</td>
+                                            <td>${let.PolaznaDestinacija}</td>
+                                            <td>${let.OdredisnaDestinacija}</td>
+                                            <td>${new Date(let.DatumVremePolaska).toLocaleString()}</td>
+                                            <td>${new Date(let.DatumVremeDolaska).toLocaleString()}</td>
+                                            <td>${let.BrojSlobodnihMesta}</td>
+                                            <td>${let.Cena}</td>
+                                            <td>${let.Status}</td>
+                                        </tr>`;
+                                $('#letoviTable tbody').append(row);
+                            });
+
+                            // Učitaj recenzije
+                            var recenzijeList = $('#recenzijeList');
+                            recenzijeList.empty();
+                            data.ListaRecenzija.forEach(function (recenzija) {
+                                var recenzijaHtml = `
+                                        <div class="recenzija">
+                                            <h4>${recenzija.Naslov}</h4>
+                                            <p>${recenzija.Sadrzaj}</p>
+                                            <p>Recenzent: ${recenzija.Recezent}</p>
+                                            <p>Status: ${recenzija.Status}</p>
+                                            ${recenzija.Slika ? '<img src="' + recenzija.Slika + '" alt="Recenzija Slika" class="recenzija-slika">' : ''}
+                                        </div>`;
+                                recenzijeList.append(recenzijaHtml);
+                            });
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error: ' + error);
+                        }
+                    });
+                } else {
+                    console.error('Nema parametra naziv u URL-u.');
+                }
+            }
+
+            loadAviokompanijaData();
+        });
+    </script>
+</head>
+<body>
+    <div class="header">
+        <a href="kompanijeRegular.html">Aviokompanije</a>
+        <a href="profilRegular.html">Uredi profil</a>
+        <a href="rezervacijeRegular.html">Moje rezervacije</a>
+        <a href="indexRegular.html">Pocetna</a>
+        <button onclick="window.location.href='prijava.html'">Prijava</button>
+        <button onclick="window.location.href='registracija.html'">Registracija</button>
+        <button onclick="window.location.href='index.html'">Odjavi se</button>
+    </div>
+
+    <div class="container">
+        <h2 id="naziv">Naziv Aviokompanije</h2>
+        <p id="adresa">Adresa: </p>
+        <p id="kontaktInformacije">Kontakt informacije: </p>
+
+        <h3>Letovi</h3>
+        <table id="letoviTable">
+            <thead>
+                <tr>
+                    <th>Let ID</th>
+                    <th>Polazna destinacija</th>
+                    <th>Odredišna destinacija</th>
+                    <th>Datum polaska</th>
+                    <th>Datum dolaska</th>
+                    <th>Broj slobodnih mesta</th>
+                    <th>Cena</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dinamički sadržaj letova -->
+            </tbody>
+        </table>
+
+        <h3>Recenzije</h3>
+        <div id="recenzijeList">
+            <!-- Dinamički sadržaj recenzija -->
+        </div>
+    </div>
+</body>
+</html>

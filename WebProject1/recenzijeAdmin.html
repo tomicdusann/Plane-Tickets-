@@ -1,0 +1,145 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administracija Recenzija</title>
+    <link rel="stylesheet" href="css/custom-style2.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            ucitajRecenzijeKreirane();
+            ucitajRecenzijeOdobrene();
+            ucitajRecenzijeOdbijene();
+        });
+
+        function ucitajRecenzijeKreirane() {
+            $.ajax({
+                url: 'api/Recenzije/KreiraneAdmin',
+                method: 'GET',
+                success: function (data) {
+                    var recenzijeList = $('#recenzijeList');
+                    data.forEach(function (recenzija) {
+                        var recenzijaHtml = `
+                                <div class="recenzija">
+                                    <h4>Aviokompanija: ${recenzija.Aviokompanija}</h4>
+                                    <p>Recezent: ${recenzija.Recezent}</p>
+                                    <p>Naslov: ${recenzija.Naslov}</p>
+                                    <p>Sadržaj: ${recenzija.Sadrzaj}</p>
+                                    <p>Status: <span class="status">${recenzija.Status}</span></p>
+                                    ${recenzija.Slika ? '<img src="' + recenzija.Slika + '" alt="Recenzija Slika" class="recenzija-slika">' : ''}
+                                    <button type="submit" class="btn-primary" data-id="${recenzija.RecenzijaID}" data-funkcija="Odobri">Odobri</button>
+                                    <button type="submit" class="btn-primary" data-id="${recenzija.RecenzijaID}" data-funkcija="Odbij">Odbij</button>
+                                </div>`;
+                        recenzijeList.append(recenzijaHtml);
+                    });
+
+                    // Dodaj funkcionalnost dugmetu
+                    $('button').click(function () {
+                        var recenzijaID = $(this).data('id');
+                        var funkcija = $(this).data('funkcija');
+                        if (recenzijaID && funkcija) {
+                            updateRecenzijaStatus(recenzijaID, funkcija);
+                        }
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Greška prilikom učitavanja recenzija: ' + error);
+                }
+            });
+        }
+
+        function ucitajRecenzijeOdobrene() {
+            $.ajax({
+                url: 'api/Recenzije/OdobreneAdmin',
+                method: 'GET',
+                success: function (data) {
+                    var recenzijeOdobreneList = $('#recenzijeOdobreneList');
+                    data.forEach(function (recenzija) {
+                        var recenzijaHtml = `
+                <div class="recenzija">
+                    <h4>Aviokompanija: ${recenzija.Aviokompanija}</h4>
+                    <p>Recezent: ${recenzija.Recezent}</p>
+                    <p>Naslov: ${recenzija.Naslov}</p>
+                    <p>Sadržaj: ${recenzija.Sadrzaj}</p>
+                    <p>Status: <span class="status">${recenzija.Status}</span></p>
+                    ${recenzija.Slika ? '<img src="' + recenzija.Slika + '" alt="Recenzija Slika" class="recenzija-slika">' : ''}
+                </div>`;
+                        recenzijeOdobreneList.append(recenzijaHtml);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Greška prilikom učitavanja recenzija: ' + error);
+                }
+            });
+        }
+
+        function ucitajRecenzijeOdbijene() {
+            $.ajax({
+                url: 'api/Recenzije/OdbijeneAdmin',
+                method: 'GET',
+                success: function (data) {
+                    var recenzijeOdbijeneList = $('#recenzijeOdbijeneList');
+                    data.forEach(function (recenzija) {
+                        var recenzijaHtml = `
+                        <div class="recenzija">
+                            <h4>Aviokompanija: ${recenzija.Aviokompanija}</h4>
+                            <p>Recezent: ${recenzija.Recezent}</p>
+                            <p>Naslov: ${recenzija.Naslov}</p>
+                            <p>Sadržaj: ${recenzija.Sadrzaj}</p>
+                            <p>Status: <span class="status">${recenzija.Status}</span></p>
+                            ${recenzija.Slika ? '<img src="' + recenzija.Slika + '" alt="Recenzija Slika" class="recenzija-slika">' : ''}
+                        </div>`;
+                        recenzijeOdbijeneList.append(recenzijaHtml);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Greška prilikom učitavanja recenzija: ' + error);
+                }
+            });
+        }
+
+        function updateRecenzijaStatus(recenzijaID, status) {
+            $.ajax({
+                url: 'api/Recenzije/' + encodeURIComponent(recenzijaID) + '/status',
+                method: 'PUT',
+                data: JSON.stringify({ StatusRecenzijePromena: status }),
+                contentType: 'application/json',
+                success: function () {
+                    alert('Status recenzije je uspešno promenjen.');
+                    location.reload(); // Osvežavanje stranice nakon promene statusa
+                },
+                error: function (xhr, status, error) {
+                    console.error('Greška prilikom promene statusa recenzije: ' + error);
+                    alert('Došlo je do greške prilikom promene statusa recenzije.');
+                }
+            });
+        }
+
+    </script>
+</head>
+<body>
+    <div class="header">
+        <a href="kompanijeAdmin.html">Upravljaj aviokompanijama</a>
+        <a href="letoviAdmin.html">Upravljaj letovima</a>
+        <a href="rezervacijeAdmin.html">Upravljaj rezervacijama</a>
+        <a href="recenzijeAdmin.html">Odobri recenzije</a>
+        <a href="profilAdmin.html">Uredi profil</a>
+        <a href="indexAdmin.html">Pocetna</a>
+        <button onclick="window.location.href='prijava.html'">Prijava</button>
+        <button onclick="window.location.href='registracija.html'">Registracija</button>
+        <button onclick="window.location.href='index.html'">Odjavi se</button>
+    </div>
+    <div class="container">
+        <h2>Kreirane recenzije</h2>
+        <div id="recenzijeList"></div>
+        <br>
+        <h2>Odobrene recenzije</h2>
+        <div id="recenzijeOdobreneList"></div>
+        <br />
+        <h2>Odbijene recenzije</h2>
+        <div id="recenzijeOdbijeneList"></div>
+        <br />
+    </div>
+</body>
+</html>
