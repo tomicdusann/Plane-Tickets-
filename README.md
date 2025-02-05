@@ -19,6 +19,6 @@ password: admin123              password: bilosta10
 
 ```bash
  - After download, to edit, run or debbug open solution file with Visual Studio 
- - Platform: Windows VS C## REST ASP.NET WebAPI 2 JavaScript HTML CSS 
+ - Platform: Windows VS C# REST ASP.NET WebAPI 2 JavaScript HTML CSS 
 ```
     
